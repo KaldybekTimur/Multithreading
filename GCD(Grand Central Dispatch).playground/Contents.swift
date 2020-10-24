@@ -75,6 +75,49 @@ class AsyncVsSyncTest2{ // concurrent queue - одновременно
 }
 
 
+//MARK: - Semaphore
+
+class SemaphoreSimple{
+    private let semaphore = DispatchSemaphore(value: 0) // value - кол-во потоков обращающихся к ресурсу.
+    func test(){
+        DispatchQueue.global().async { // глобальная очередь и метод asynс()
+            sleep(1)
+            print("1")
+            self.semaphore.signal()
+        }
+        semaphore.wait()
+        print("2")
+    }
+} // output: 1 2
+
+
+class SemaphoreTest2{
+    private let semaphore = DispatchSemaphore(value: 2) // 2 - кол-во потоков обращающихся к ресурсу
+    
+    func doWork(){
+        semaphore.wait()
+        sleep(3)
+        print("Test")
+        semaphore.signal()
+    }
+    
+    func Test(){
+        DispatchQueue.global().async {
+            self.doWork()
+        }
+        DispatchQueue.global().async {
+            self.doWork()
+        }
+        DispatchQueue.global().async {
+            self.doWork()
+        }
+    }
+}
+// output - Test Test ... 3 seconds ... Test, потому что в начале стоит DispatchSemaphore(value: 2)
+
+
+
+
 
 
 
