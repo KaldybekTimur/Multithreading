@@ -1,3 +1,12 @@
 import Cocoa
 
-var str = "Hello, playground"
+
+let operationQueue = OperationQueue()
+operationQueue.maxConcurrentOperationCount = 1
+operationQueue.addOperation {
+     print("test1")
+}
+ 
+operationQueue.addOperation {
+     print("test2")
+}
