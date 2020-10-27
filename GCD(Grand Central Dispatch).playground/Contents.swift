@@ -76,6 +76,7 @@ class AsyncVsSyncTest2{ // concurrent queue - одновременно
 
 
 //MARK: - Semaphore
+// Очередь на выполнения (wait, signal)
 
 class SemaphoreSimple{
     private let semaphore = DispatchSemaphore(value: 0) // value - кол-во потоков обращающихся к ресурсу.
@@ -116,8 +117,74 @@ class SemaphoreTest2{
 // output - Test Test ... 3 seconds ... Test, потому что в начале стоит DispatchSemaphore(value: 2)
 
 
+//MARK: - Dispatch Group (используется если выполняются несколько задач)
+
+/*class DispatchGroup{
+  
+    let group = DispatchGroup()
+    let concurrentQueue = DispatchQueue(label: "concurrentQueue", attributes: .concurrent)
+     
+    group.enter()
+    concurrentQueue.async {
+        print("test1")
+        group.leave()
+    }
+     
+    group.enter()
+    concurrentQueue.async {
+         print("test2")
+         group.leave()
+    }
+     
+    group.wait()
+}
+*/
+
+//MARK: - Dispatch Barrier
+
+class DispatchBarrierTest{
+    
+    private let queue = DispatchQueue(label: "DispatchBarrierTest", attributes: .concurrent)
+    
+    private var internalTest : Int = 0
+    
+    // setter
+    func setTest(_ test: Int){
+        queue.async(flags: .barrier) {
+            self.internalTest = test
+        }
+    }
+    //getter
+    func getTest() -> Int{
+        
+        var tmp : Int = 0
+        queue.sync {
+            tmp = self.internalTest
+        }
+        return tmp
+    }
+}
 
 
+//MARK: - Dispatch source
+///Dispatch Source - Системный фундаментальный тип данных который позволяет взаимодействовать с системными событиями
+///Timer Dispatch source - Тип Dispatch source, который генерирует периодические нотификации
+///Signal Dispatch source - Тип Dispatch source, который взаимодействует с unix-сигналами
+///Descriptor Dispatch source - Тип Dispatch source, который оповещает о том, что с файлом были произведены различные операции
+///Process Dispatch source - Тип Dispatch source, который позволяет слушать события процесса
 
 
+class timerDispatchSourceTest{
+    private let source = DispatchSource.makeTimerSource()
+    
+    func test(){
+        source.setEventHandler {
+            print("Test")
+        }
+        source.schedule(deadline: .now(), repeating: 5)
+        source.activate()
+    }
+}
+// Output - test ... 5 sec ... test ... 5 sec ... test
 
+//MARK: - Target Queue - сокращает context switch
